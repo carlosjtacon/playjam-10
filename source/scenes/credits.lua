@@ -14,7 +14,7 @@ local function update(_dt)
   gfx.drawText("CREDITS", MARGIN, MARGIN)
 
   SetFont(Fonts.default)
-  gfx.drawText("Made by " .. md.author, MARGIN, 58)
+  gfx.drawText("Made by " .. md.author .. " for Playjam 10", MARGIN, 58)
   gfx.drawText("Coded in Lua using the Sunny template", MARGIN, 82)
   gfx.drawText("Asheville font by Panic (CC BY 4.0)", MARGIN, 106)
 end
