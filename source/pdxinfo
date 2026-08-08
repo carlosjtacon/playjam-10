@@ -1,0 +1,7 @@
+name=YOURGAME
+author=YOURNAME
+description=Some pithy description
+bundleID=com.yourbundleid.yourgame
+version=0.1-dev
+buildNumber=1
+#itch=username/gameslug
