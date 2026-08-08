@@ -26,20 +26,20 @@ controls_default = {
 }
 
 controls_swapped = {
-  up = playdate.kButtonUp,
-  down = playdate.kButtonDown,
-  left = playdate.kButtonLeft,
-  right = playdate.kButtonRight,
-  addTop = 1,
-  addBottom = -1,
-  removeTop = playdate.kButtonB,
-  removeBottom = playdate.kButtonA,
+  up = playdate.kButtonDown,
+  down = playdate.kButtonUp,
+  left = playdate.kButtonRight,
+  right = playdate.kButtonLeft,
+  addTop = -1,
+  addBottom = 1,
+  removeTop = playdate.kButtonA,
+  removeBottom = playdate.kButtonB,
 }
 
 controls = {}
 
 function init()
-  controls = controls_default
+  controls = controls
 
   -- init the map for player and puzzle
   for i = 1, rows do
@@ -82,6 +82,7 @@ local function getFirstMatch(matrix, value)
       end
     end
   end
+  return nil, nil
 end
 
 local function getLastMatch(matrix, value)
@@ -92,6 +93,7 @@ local function getLastMatch(matrix, value)
       end
     end
   end
+  return nil, nil
 end
 
 function updatePlayer(prevMap)
@@ -99,22 +101,30 @@ function updatePlayer(prevMap)
 
   if crankTicks == controls.addTop then
     i, j = getFirstMatch(map.player, 0)
-    map.player[i][j] = 1
+    if i and j then
+      map.player[i][j] = 1
+    end
   end
 
   if crankTicks == controls.addBottom then
     i, j = getLastMatch(map.player, 0)
-    map.player[i][j] = 1
+    if i and j then
+      map.player[i][j] = 1
+    end
   end
 
   if playdate.buttonJustPressed(controls.removeTop) then
     i, j = getFirstMatch(map.player, 1)
-    map.player[i][j] = 0
+    if i and j then
+      map.player[i][j] = 0
+    end
   end
   --
   if playdate.buttonJustPressed(controls.removeBottom) then
     i, j = getLastMatch(map.player, 1)
-    map.player[i][j] = 0
+    if i and j then
+      map.player[i][j] = 0
+    end
   end
 
   if playdate.buttonJustPressed(controls.left) then
