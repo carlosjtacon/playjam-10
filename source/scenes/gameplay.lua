@@ -3,7 +3,7 @@ import "CoreLibs/crank"
 
 local gfx <const> = playdate.graphics
 
-local rows <const> = 8
+local rows <const> = 6
 local gridSize <const> = math.floor((DISPLAY_HEIGHT-30) / rows)
 local cols <const> = math.ceil(DISPLAY_WIDTH / gridSize)
 
@@ -95,9 +95,9 @@ local function newRound()
   if mode =="default" then
     score += 1
     slowness -= 2
-    if slowness < 10 then slowness = 10 end
+    if slowness < 12 then slowness = 12 end
     puzzleLevelMax += 1
-    if puzzleLevelMax > 10 then puzzleLevelMax = 10 end
+    if puzzleLevelMax > 8 then puzzleLevelMax = 8 end
   end
 
   map = table.deepcopy(map_init)
@@ -128,7 +128,6 @@ function init()
 
   updates = 0
   swapMode("default")
-  playdate.graphics.setDrawOffset(-gridSize, -gridSize)
 
   newRound()
 end
@@ -142,15 +141,16 @@ function drawGame()
   gfx.clear()
 
 
-  playdate.graphics.drawText("" .. score, 35, 245)
-  playdate.graphics.drawText(secondsToClock(time), 70, 245)
+  playdate.graphics.drawText("" .. score, 10, 220)
+  playdate.graphics.drawText(secondsToClock(time), 45, 220)
 
   if mode =="swapped" then
-      playdate.graphics.drawText("Last chance! Controls swapped..", 175, 245)
+      playdate.graphics.drawText("Last chance! Controls swapped..", 150, 220)
   else
-      playdate.graphics.drawText("Learn to control..", 290, 245)
+      playdate.graphics.drawText("Learn to control..", 265, 220)
   end
 
+  playdate.graphics.setDrawOffset(-gridSize, -gridSize)
   for i = 1, rows do
     for j = 1, cols do
       -- draw our player
@@ -163,6 +163,7 @@ function drawGame()
       end
     end
   end
+  playdate.graphics.setDrawOffset(0, 0)
 
 end
 
