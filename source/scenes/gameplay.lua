@@ -7,14 +7,21 @@ local rows <const> = 8
 local gridSize <const> = DISPLAY_HEIGHT / rows
 local cols <const> = math.ceil(DISPLAY_WIDTH / gridSize)
 
-local ticksPerRevolution <const> = 6
+local ticksPerRevolution <const> = 6 -- crank speedometer
+local updates = 0
 
 local map = {
-  player = {},
-  puzzle = {},
+  player = {}, -- players's shape
+  puzzle = {}, -- current puzzle shape, with offset applied
+  puzzleTarget = {}, -- current puzzle shape, without offset
+  puzzleLevel = 0, -- how hard the puzzle is this round, could drive the speed or might not use it for now
+  puzzleLevelMax = 5, -- the hardest the puzzle should be this round
+  puzzleOffset = cols, -- starts offscreen
+  slowness = 30, -- every how many frames gets offset, starts at 1 update per second at 30fps
 }
 
-controls_default = {
+local controls = {}
+local controls_default = {
   up = playdate.kButtonUp,
   down = playdate.kButtonDown,
   left = playdate.kButtonLeft,
@@ -24,8 +31,7 @@ controls_default = {
   removeTop = playdate.kButtonB,
   removeBottom = playdate.kButtonA,
 }
-
-controls_swapped = {
+local controls_swapped = {
   up = playdate.kButtonDown,
   down = playdate.kButtonUp,
   left = playdate.kButtonRight,
@@ -36,10 +42,40 @@ controls_swapped = {
   removeBottom = playdate.kButtonB,
 }
 
-controls = {}
+local function generatePuzzle()
+  math.randomseed(playdate.getSecondsSinceEpoch())
+  local level = 0
+  local puzzle = {}
+  local token = nil
+
+  for i = 1, rows do
+    puzzle[i] = {}
+    for j = 1, cols do
+      if j ~= 1 and puzzle[i][j-1] == 1 then
+        token = 1 -- black row as soon as there is one black
+      elseif i ~= 1 and puzzle[i-1][j] == 0 then
+        token = math.floor(math.random() + 0.15) -- if the previous cell is white chances are less to become black
+      else
+        token = math.floor(math.random() + 0.5) -- default chance of black cell
+      end
+
+      if token == 0 then
+        if level >= map.puzzleLevelMax then
+          token = 1 -- black if we reached the maximum level
+        else
+          level += 1
+        end
+      end
+      puzzle[i][j] = token
+    end
+  end
+
+  map.level = level
+  map.puzzleTarget = table.deepcopy(puzzle)
+end
 
 function init()
-  controls = controls
+  controls = controls_default
 
   -- init the map for player and puzzle
   for i = 1, rows do
@@ -53,21 +89,24 @@ function init()
   map.player[1][1] = 1
 
   -- printTable(map.player)
+  map.puzzleLevelMax = 5
+  generatePuzzle()
 end
 
 function drawGame()
+  updates += 1
+
   gfx.clear()
   playdate.graphics.setDrawOffset(-gridSize, -gridSize)
   for i = 1, rows do
     for j = 1, cols do
+      -- draw our player
       if map.player[i][j] == 1 then
         gfx.fillRect(j * gridSize + 1, i * gridSize + 1, gridSize -2, gridSize -2)
       end
+      -- draw our puzzle
       if map.puzzle[i][j] == 1 then
-        -- gfx.setColor(gfx.kColorBlack)
         gfx.fillRect(j * gridSize + 1, i * gridSize + 1, gridSize -2, gridSize -2)
-        -- gfx.setColor(gfx.kColorWhite)
-        -- gfx.fillRect(j * gridSize + 1, i * gridSize + 1, gridSize -2, gridSize -2)
       end
     end
   end
@@ -96,32 +135,32 @@ local function getLastMatch(matrix, value)
   return nil, nil
 end
 
-function updatePlayer(prevMap)
+local function updatePlayer(prevMap)
   local crankTicks = playdate.getCrankTicks(ticksPerRevolution)
 
   if crankTicks == controls.addTop then
-    i, j = getFirstMatch(map.player, 0)
+    local i, j = getFirstMatch(map.player, 0)
     if i and j then
       map.player[i][j] = 1
     end
   end
 
   if crankTicks == controls.addBottom then
-    i, j = getLastMatch(map.player, 0)
+    local i, j = getLastMatch(map.player, 0)
     if i and j then
       map.player[i][j] = 1
     end
   end
 
   if playdate.buttonJustPressed(controls.removeTop) then
-    i, j = getFirstMatch(map.player, 1)
+    local i, j = getFirstMatch(map.player, 1)
     if i and j then
       map.player[i][j] = 0
     end
   end
   --
   if playdate.buttonJustPressed(controls.removeBottom) then
-    i, j = getLastMatch(map.player, 1)
+    local i, j = getLastMatch(map.player, 1)
     if i and j then
       map.player[i][j] = 0
     end
@@ -173,8 +212,25 @@ function updatePlayer(prevMap)
 
 end
 
-local function updatePuzzle(prevMap)
+local function offsetPuzzle()
+  for i = 1, rows do
+    map.puzzle[i] = {}
+    for j = 1, cols do
+      if j < map.puzzleOffset then
+        map.puzzle[i][j] = 0
+      else
+        map.puzzle[i][j] = map.puzzleTarget[i][j-map.puzzleOffset]
+      end
+    end
+  end
 
+  map.puzzleOffset -= 1
+end
+
+local function updatePuzzle()
+  if updates % map.slowness == 0 then
+    offsetPuzzle()
+  end
 end
 
 local function update(dt)
@@ -182,10 +238,9 @@ local function update(dt)
   local prevMap = table.deepcopy(map)
 
   updatePlayer(prevMap)
-  updatePuzzle(prevMap)
+  updatePuzzle()
 
   drawGame()
-
 end
 
 init()
