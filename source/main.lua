@@ -12,14 +12,16 @@ local FPS <const> = 30 -- change this to whatever target framerate you want; Pla
 
 SCENE = {
   MAIN_MENU = 1,
-  CREDITS = 2,
-  GAMEPLAY = 3,
+  CREDITS   = 2,
+  GAMEPLAY  = 3,
+  GAME_OVER = 4,
 }
 
 local scenes = {
   [SCENE.MAIN_MENU] = import("scenes/main_menu"),
   [SCENE.CREDITS] = import("scenes/credits"),
   [SCENE.GAMEPLAY] = import("scenes/gameplay"),
+  [SCENE.GAME_OVER] = import("scenes/game_over"),
 }
 
 local currentScene = scenes[SCENE.MAIN_MENU]

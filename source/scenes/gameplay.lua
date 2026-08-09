@@ -8,9 +8,10 @@ local gridSize <const> = DISPLAY_HEIGHT / rows
 local cols <const> = math.ceil(DISPLAY_WIDTH / gridSize)
 
 local ticksPerRevolution <const> = 6 -- crank speedometer
-local updates = 0
+local updates = nil
 
-local map = {
+local map = {}
+local map_init = {
   player = {}, -- players's shape
   puzzle = {}, -- current puzzle shape, with offset applied
   puzzleTarget = {}, -- current puzzle shape, without offset
@@ -75,9 +76,16 @@ local function generatePuzzle()
 end
 
 function init()
+  print("Init Gameplay")
+
+  score = 0
+  time = 0
+  updates = 0
   controls = controls_default
+  playdate.graphics.setDrawOffset(-gridSize, -gridSize)
 
   -- init the map for player and puzzle
+  map = table.deepcopy(map_init)
   for i = 1, rows do
     map.player[i] = {}
     map.puzzle[i] = {}
@@ -93,11 +101,14 @@ function init()
   generatePuzzle()
 end
 
+function close()
+  playdate.graphics.setDrawOffset(0, 0)
+end
+
 function drawGame()
   updates += 1
 
   gfx.clear()
-  playdate.graphics.setDrawOffset(-gridSize, -gridSize)
   for i = 1, rows do
     for j = 1, cols do
       -- draw our player
@@ -213,10 +224,14 @@ local function updatePlayer(prevMap)
 end
 
 local function offsetPuzzle()
+  if map.puzzleOffset < 0 then
+    return
+  end
+
   for i = 1, rows do
     map.puzzle[i] = {}
     for j = 1, cols do
-      if j < map.puzzleOffset then
+      if j <= map.puzzleOffset then
         map.puzzle[i][j] = 0
       else
         map.puzzle[i][j] = map.puzzleTarget[i][j-map.puzzleOffset]
@@ -233,20 +248,47 @@ local function updatePuzzle()
   end
 end
 
+local function checkState()
+  local won = true
+  for i = 1, rows do
+    for j = 1, cols do
+      local cell = map.player[i][j] + map.puzzle[i][j]
+      if cell == 2 then
+        print("Lost the round") -- need to add the last chance swapped controls
+        if score > SaveData.high_score then
+          SaveData.high_score = score
+        end
+        PlaySFX("B5")
+        SwitchScene(SCENE.GAME_OVER)
+      elseif cell == 0 then
+        won = false
+      end
+    end
+  end
+
+  if won then
+    print("Won the round") -- no zeroes or twos means all ones
+    score += 1
+  end
+
+end
+
 local function update(dt)
+  time += dt
   SaveData.playtime += dt
   local prevMap = table.deepcopy(map)
 
   updatePlayer(prevMap)
   updatePuzzle()
+  checkState()
 
   drawGame()
 end
 
-init()
-
 local scene = {
   update = update,
+  close = close,
+  init = init,
 }
 
 return scene

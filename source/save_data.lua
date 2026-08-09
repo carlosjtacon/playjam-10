@@ -4,6 +4,7 @@ local SAVE_FILE <const> = "save"
 -- present on disk
 SaveData = {
   playtime = 0.0, -- only updated in gameplay scene
+  high_score = 0.0,
   -- add more save data here
 }
 
