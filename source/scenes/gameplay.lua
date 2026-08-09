@@ -31,8 +31,8 @@ local controls_default = {
   right = playdate.kButtonRight,
   addTop = playdate.kButtonA,
   addBottom = playdate.kButtonB,
-  forward = -1,
-  rewind = 1,
+  forward = 1,
+  rewind = -1,
 }
 local controls_swapped = {
   up = playdate.kButtonDown,
@@ -41,8 +41,8 @@ local controls_swapped = {
   right = playdate.kButtonLeft,
   addTop = playdate.kButtonA,
   addBottom = playdate.kButtonB,
-  forward = 1,
-  rewind = -1,
+  forward = -1,
+  rewind = 1,
 }
 
 local function generatePuzzle()
@@ -91,6 +91,7 @@ local function swapMode(mode_to)
 end
 
 local function newRound()
+  playdate.wait(1000)
   if mode =="default" then
     score += 1
     slowness -= 2
@@ -191,16 +192,18 @@ local function updatePlayer(prevMap)
   local crankTicks = playdate.getCrankTicks(ticksPerRevolution)
 
   if crankTicks == controls.forward then
-    PlaySFX("B1")
-    if map.puzzleOffset < cols then
-      map.puzzleOffset += 1
+    PlaySFX("E1")
+    print("forward")
+    if map.puzzleOffset > 0 then
+      map.puzzleOffset -= 1
     end
   end
 
   if crankTicks == controls.rewind then
-    PlaySFX("E1")
-    if map.puzzleOffset > 0 then
-      map.puzzleOffset -= 1
+    PlaySFX("B1")
+    print("rewind")
+    if map.puzzleOffset < cols then
+      map.puzzleOffset += 1
     end
   end
 
@@ -296,12 +299,11 @@ local function updatePuzzle()
 end
 
 local function lostRound()
-  printTable(map)
   print("Lost the round ", mode) -- need to add the last chance swapped controls
   if mode == "default" then
+    newRound()
     PlaySFX("C6")
     swapMode("swapped")
-    newRound()
   elseif mode == "swapped" then
     PlaySFX("F3")
     if score > SaveData.high_score then
@@ -330,9 +332,10 @@ local function checkState()
 
   if won then
     print("Won the round") -- no zeroes or twos means all ones
+    newRound()
+
     PlaySFX("C5")
     swapMode("default")
-    newRound()
   end
 
 end
@@ -344,9 +347,10 @@ local function update(dt)
 
   updatePlayer(prevMap)
   updatePuzzle()
+  drawGame()
+
   checkState()
 
-  drawGame()
 end
 
 local scene = {
