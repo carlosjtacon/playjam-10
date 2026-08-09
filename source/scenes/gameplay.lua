@@ -39,8 +39,8 @@ local controls_swapped = {
   down = playdate.kButtonUp,
   left = playdate.kButtonRight,
   right = playdate.kButtonLeft,
-  addTop = playdate.kButtonA,
-  addBottom = playdate.kButtonB,
+  addTop = playdate.kButtonB,
+  addBottom = playdate.kButtonA,
   forward = -1,
   rewind = 1,
 }
@@ -59,7 +59,7 @@ local function generatePuzzle()
       elseif i ~= 1 and puzzle[i-1][j] == 0 then
         token = math.floor(math.random() + 0.15) -- if the previous cell is white chances are less to become black
       else
-        token = math.floor(math.random() + 0.5) -- default chance of black cell
+        token = math.floor(math.random() + 0.50) -- default chance of black cell
       end
 
       if token == 0 then
@@ -90,14 +90,18 @@ local function swapMode(mode_to)
   print("Setting mode to: ", mode)
 end
 
+local function updateDifficulty()
+    slowness -= 1
+    if slowness < 14 then slowness = 14 end
+    puzzleLevelMax += 1
+    if puzzleLevelMax > 10 then puzzleLevelMax = 10 end
+end
+
 local function newRound()
   playdate.wait(1000)
   if mode =="default" then
     score += 1
-    slowness -= 2
-    if slowness < 12 then slowness = 12 end
-    puzzleLevelMax += 1
-    if puzzleLevelMax > 8 then puzzleLevelMax = 8 end
+    updateDifficulty()
   end
 
   map = table.deepcopy(map_init)
