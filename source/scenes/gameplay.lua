@@ -8,7 +8,7 @@ local gridSize <const> = math.floor((DISPLAY_HEIGHT-30) / rows)
 local cols <const> = math.ceil(DISPLAY_WIDTH / gridSize)
 
 local ticksPerRevolution <const> = 1 -- crank speedometer
-local score, time = 0, 0
+score, time = 0, 0
 local updates = nil
 
 local map = {}
