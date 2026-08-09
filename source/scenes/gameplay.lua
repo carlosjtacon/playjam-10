@@ -31,8 +31,8 @@ local controls_default = {
   right = playdate.kButtonRight,
   addTop = playdate.kButtonA,
   addBottom = playdate.kButtonB,
-  forward = 1,
-  rewind = -1,
+  forward = -1,
+  rewind = 1,
 }
 local controls_swapped = {
   up = playdate.kButtonDown,
@@ -41,8 +41,8 @@ local controls_swapped = {
   right = playdate.kButtonLeft,
   addTop = playdate.kButtonA,
   addBottom = playdate.kButtonB,
-  forward = -1,
-  rewind = 1,
+  forward = 1,
+  rewind = -1,
 }
 
 local function generatePuzzle()
@@ -191,11 +191,15 @@ local function updatePlayer(prevMap)
   local crankTicks = playdate.getCrankTicks(ticksPerRevolution)
 
   if crankTicks == controls.forward then
-    map.puzzleOffset += 1
+    if map.puzzleOffset < cols then
+      map.puzzleOffset += 1
+    end
   end
 
   if crankTicks == controls.rewind then
-    map.puzzleOffset -= 1
+    if map.puzzleOffset > 0 then
+      map.puzzleOffset -= 1
+    end
   end
 
   if playdate.buttonJustPressed(controls.addTop) then
@@ -284,6 +288,7 @@ local function updatePuzzle()
 end
 
 local function lostRound()
+  printTable(map)
   print("Lost the round ", mode) -- need to add the last chance swapped controls
   if mode == "default" then
     PlaySFX("B5")
