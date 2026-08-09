@@ -8,6 +8,7 @@ local gridSize <const> = math.floor((DISPLAY_HEIGHT-30) / rows)
 local cols <const> = math.ceil(DISPLAY_WIDTH / gridSize)
 
 local ticksPerRevolution <const> = 1 -- crank speedometer
+local score, time = 0, 0
 local updates = nil
 
 local map = {}
@@ -19,8 +20,8 @@ local map_init = {
   puzzleOffset = cols, -- starts offscreen
 }
 
-slowness = nil -- every how many frames gets offset, starts at 1 update per second at 30fps
-puzzleLevelMax = nil -- the hardest the puzzle should be this round
+local slowness = nil -- every how many frames gets offset, starts at 1 update per second at 30fps
+local puzzleLevelMax = nil -- the hardest the puzzle should be this round
 
 local mode = nil
 local controls = {}
@@ -136,11 +137,7 @@ function init()
   newRound()
 end
 
-function close()
-  playdate.graphics.setDrawOffset(0, 0)
-end
-
-function drawGame()
+local function drawGame()
   updates += 1
   gfx.clear()
 
@@ -360,7 +357,6 @@ end
 
 local scene = {
   update = update,
-  close = close,
   init = init,
 }
 
