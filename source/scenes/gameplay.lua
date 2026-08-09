@@ -7,7 +7,7 @@ local rows <const> = 8
 local gridSize <const> = math.floor((DISPLAY_HEIGHT-30) / rows)
 local cols <const> = math.ceil(DISPLAY_WIDTH / gridSize)
 
-local ticksPerRevolution <const> = 6 -- crank speedometer
+local ticksPerRevolution <const> = 1 -- crank speedometer
 local updates = nil
 
 local map = {}
@@ -29,20 +29,20 @@ local controls_default = {
   down = playdate.kButtonDown,
   left = playdate.kButtonLeft,
   right = playdate.kButtonRight,
-  addTop = 1,
-  addBottom = -1,
-  removeTop = playdate.kButtonB,
-  removeBottom = playdate.kButtonA,
+  addTop = playdate.kButtonA,
+  addBottom = playdate.kButtonB,
+  forward = 1,
+  rewind = -1,
 }
 local controls_swapped = {
   up = playdate.kButtonDown,
   down = playdate.kButtonUp,
   left = playdate.kButtonRight,
   right = playdate.kButtonLeft,
-  addTop = -1,
-  addBottom = 1,
-  removeTop = playdate.kButtonA,
-  removeBottom = playdate.kButtonB,
+  addTop = playdate.kButtonA,
+  addBottom = playdate.kButtonB,
+  forward = -1,
+  rewind = 1,
 }
 
 local function generatePuzzle()
@@ -190,31 +190,25 @@ end
 local function updatePlayer(prevMap)
   local crankTicks = playdate.getCrankTicks(ticksPerRevolution)
 
-  if crankTicks == controls.addTop then
+  if crankTicks == controls.forward then
+    map.puzzleOffset += 1
+  end
+
+  if crankTicks == controls.rewind then
+    map.puzzleOffset -= 1
+  end
+
+  if playdate.buttonJustPressed(controls.addTop) then
     local i, j = getFirstMatch(map.player, 0)
     if i and j then
       map.player[i][j] = 1
     end
   end
 
-  if crankTicks == controls.addBottom then
+  if playdate.buttonJustPressed(controls.addBottom) then
     local i, j = getLastMatch(map.player, 0)
     if i and j then
       map.player[i][j] = 1
-    end
-  end
-
-  if playdate.buttonJustPressed(controls.removeTop) then
-    local i, j = getFirstMatch(map.player, 1)
-    if i and j then
-      map.player[i][j] = 0
-    end
-  end
-  --
-  if playdate.buttonJustPressed(controls.removeBottom) then
-    local i, j = getLastMatch(map.player, 1)
-    if i and j then
-      map.player[i][j] = 0
     end
   end
 
