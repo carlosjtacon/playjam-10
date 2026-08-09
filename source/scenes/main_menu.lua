@@ -8,10 +8,12 @@ local MARGIN = 10
 
 local OPTION = {
   PLAY = 1,
-  CREDITS = 2,
+  ZEN = 2,
+  CREDITS = 3,
 }
 local options = {
   [OPTION.PLAY] = "Play",
+  [OPTION.ZEN] = "Zen Mode",
   [OPTION.CREDITS] = "Credits",
 }
 local currentOption = 1
@@ -38,6 +40,8 @@ local function update(_dt)
 
     if currentOption == OPTION.PLAY then
       SwitchScene(SCENE.GAMEPLAY)
+    elseif currentOption == OPTION.ZEN then
+      SwitchScene(SCENE.ZEN)
     elseif currentOption == OPTION.CREDITS then
       SwitchScene(SCENE.CREDITS)
     end
@@ -52,7 +56,7 @@ local function update(_dt)
   gfx.drawText("by " .. md.author, 10, DISPLAY_HEIGHT - ASHEVILLE14_HEIGHT - MARGIN)
   gfx.drawText(version, DISPLAY_WIDTH - VERSION_TEXT_WIDTH - MARGIN, DISPLAY_HEIGHT - ASHEVILLE14_HEIGHT - MARGIN)
 
-  local menuStartY = 80
+  local menuStartY = 50
   local menuYSpacing = 32
   local menuDotSize = 6
   for index, value in pairs(options) do

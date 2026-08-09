@@ -15,6 +15,7 @@ SCENE = {
   CREDITS   = 2,
   GAMEPLAY  = 3,
   GAME_OVER = 4,
+  ZEN = 5,
 }
 
 local scenes = {
@@ -22,6 +23,7 @@ local scenes = {
   [SCENE.CREDITS] = import("scenes/credits"),
   [SCENE.GAMEPLAY] = import("scenes/gameplay"),
   [SCENE.GAME_OVER] = import("scenes/game_over"),
+  [SCENE.ZEN] = import("scenes/zen"),
 }
 
 local currentScene = scenes[SCENE.MAIN_MENU]
