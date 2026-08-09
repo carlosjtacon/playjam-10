@@ -9,7 +9,6 @@ local cols <const> = math.ceil(DISPLAY_WIDTH / gridSize)
 
 local ticksPerRevolution <const> = 1 -- crank speedometer
 local score, time = 0, 0
-local updates = nil
 
 local map = {}
 local map_init = {
@@ -20,12 +19,9 @@ local map_init = {
   puzzleOffset = cols, -- starts offscreen
 }
 
-local slowness = nil -- every how many frames gets offset, starts at 1 update per second at 30fps
 local puzzleLevelMax = nil -- the hardest the puzzle should be this round
 
-local mode = nil
-local controls = {}
-local controls_default = {
+local controls = {
   up = playdate.kButtonUp,
   down = playdate.kButtonDown,
   left = playdate.kButtonLeft,
@@ -34,16 +30,6 @@ local controls_default = {
   addBottom = playdate.kButtonB,
   forward = 1,
   rewind = -1,
-}
-local controls_swapped = {
-  up = playdate.kButtonDown,
-  down = playdate.kButtonUp,
-  left = playdate.kButtonRight,
-  right = playdate.kButtonLeft,
-  addTop = playdate.kButtonB,
-  addBottom = playdate.kButtonA,
-  forward = -1,
-  rewind = 1,
 }
 
 local function generatePuzzle()
@@ -78,32 +64,34 @@ local function generatePuzzle()
   map.puzzleTarget = table.deepcopy(puzzle)
 end
 
-local function swapMode(mode_to)
-  if mode_to == "default" then
-    controls = controls_default
-    playdate.display.setInverted(false)
-  elseif mode_to == "swapped" then
-    controls = controls_swapped
-    playdate.display.setInverted(true)
-  end
-
-  mode = mode_to
-  print("Setting mode to: ", mode)
+local function updateDifficulty()
+    puzzleLevelMax += 1
+    if puzzleLevelMax > 15 then puzzleLevelMax = 15 end
 end
 
-local function updateDifficulty()
-    slowness -= 1
-    if slowness < 14 then slowness = 14 end
-    puzzleLevelMax += 1
-    if puzzleLevelMax > 10 then puzzleLevelMax = 10 end
+local function offsetPuzzle()
+  if map.puzzleOffset < 0 then
+    return
+  end
+
+  for i = 1, rows do
+    map.puzzle[i] = {}
+    for j = 1, cols do
+      if j <= map.puzzleOffset then
+        map.puzzle[i][j] = 0
+      else
+        map.puzzle[i][j] = map.puzzleTarget[i][j-map.puzzleOffset]
+      end
+    end
+  end
+
+  map.puzzleOffset -= 1
 end
 
 local function newRound()
   playdate.wait(1000)
-  if mode =="default" then
-    score += 1
-    updateDifficulty()
-  end
+  score += 1
+  updateDifficulty()
 
   map = table.deepcopy(map_init)
   for i = 1, rows do
@@ -120,6 +108,10 @@ local function newRound()
     generatePuzzle()
   end
 
+  for _ = 1, 8 do
+   offsetPuzzle()
+  end
+
   print("New round! ", score)
 end
 
@@ -128,28 +120,18 @@ function init()
 
   score = -1
   time = 0
-  slowness = 30
-  puzzleLevelMax = 0
-
-  updates = 0
-  swapMode("default")
+  puzzleLevelMax = 5
 
   newRound()
 end
 
 local function drawGame()
-  updates += 1
   gfx.clear()
 
 
   playdate.graphics.drawText("" .. score, 10, 220)
   playdate.graphics.drawText(secondsToClock(time), 45, 220)
-
-  if mode =="swapped" then
-      playdate.graphics.drawText("Last chance! Controls swapped..", 150, 220)
-  else
-      playdate.graphics.drawText("Learn to control..", 265, 220)
-  end
+  playdate.graphics.drawText("Learn to control..", 265, 220)
 
   playdate.graphics.setDrawOffset(-gridSize, -gridSize)
   for i = 1, rows do
@@ -193,20 +175,10 @@ end
 local function updatePlayer(prevMap)
   local crankTicks = playdate.getCrankTicks(ticksPerRevolution)
 
-  if crankTicks == controls.forward then
+  if crankTicks == controls.forward or crankTicks == controls.rewind then
     PlaySFX("E1")
-    print("forward")
-    if map.puzzleOffset > 0 then
-      map.puzzleOffset -= 1
-    end
-  end
-
-  if crankTicks == controls.rewind then
-    PlaySFX("B1")
-    print("rewind")
-    if map.puzzleOffset < cols then
-      map.puzzleOffset += 1
-    end
+    newRound()
+    score -= 1
   end
 
   if playdate.buttonJustPressed(controls.addTop) then
@@ -275,44 +247,11 @@ local function updatePlayer(prevMap)
 
 end
 
-local function offsetPuzzle()
-  if map.puzzleOffset < 0 then
-    return
-  end
-
-  for i = 1, rows do
-    map.puzzle[i] = {}
-    for j = 1, cols do
-      if j <= map.puzzleOffset then
-        map.puzzle[i][j] = 0
-      else
-        map.puzzle[i][j] = map.puzzleTarget[i][j-map.puzzleOffset]
-      end
-    end
-  end
-
-  map.puzzleOffset -= 1
-end
-
-local function updatePuzzle()
-  if updates % slowness == 0 then
-    offsetPuzzle()
-  end
-end
-
 local function lostRound()
-  print("Lost the round ", mode) -- need to add the last chance swapped controls
-  if mode == "default" then
-    newRound()
-    PlaySFX("C6")
-    swapMode("swapped")
-  elseif mode == "swapped" then
-    PlaySFX("F3")
-    if score > SaveData.high_score then
-      SaveData.high_score = score
-    end
-    SwitchScene(SCENE.GAME_OVER)
-  end
+  print("Lost the round ") -- need to add the last chance swapped controls
+  newRound()
+  score -= 1
+  PlaySFX("C6")
 end
 
 local function checkState()
@@ -337,7 +276,6 @@ local function checkState()
     newRound()
 
     PlaySFX("C5")
-    swapMode("default")
   end
 
 end
@@ -348,7 +286,6 @@ local function update(dt)
   local prevMap = table.deepcopy(map)
 
   updatePlayer(prevMap)
-  updatePuzzle()
   drawGame()
 
   checkState()
