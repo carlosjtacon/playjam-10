@@ -191,18 +191,21 @@ local function updatePlayer(prevMap)
   local crankTicks = playdate.getCrankTicks(ticksPerRevolution)
 
   if crankTicks == controls.forward then
+    PlaySFX("B1")
     if map.puzzleOffset < cols then
       map.puzzleOffset += 1
     end
   end
 
   if crankTicks == controls.rewind then
+    PlaySFX("E1")
     if map.puzzleOffset > 0 then
       map.puzzleOffset -= 1
     end
   end
 
   if playdate.buttonJustPressed(controls.addTop) then
+    PlaySFX("A3")
     local i, j = getFirstMatch(map.player, 0)
     if i and j then
       map.player[i][j] = 1
@@ -210,6 +213,7 @@ local function updatePlayer(prevMap)
   end
 
   if playdate.buttonJustPressed(controls.addBottom) then
+    PlaySFX("B3")
     local i, j = getLastMatch(map.player, 0)
     if i and j then
       map.player[i][j] = 1
@@ -217,6 +221,7 @@ local function updatePlayer(prevMap)
   end
 
   if playdate.buttonJustPressed(controls.left) then
+    PlaySFX("F2")
     for i = 1, rows do
       for j = 1, cols do
         if j == #map.player[i] then
@@ -229,6 +234,7 @@ local function updatePlayer(prevMap)
   end
 
   if playdate.buttonJustPressed(controls.right) then
+    PlaySFX("E2")
     for i = 1, rows do
       for j = 2, cols do
           map.player[i][j] = prevMap.player[i][j-1]
@@ -237,6 +243,7 @@ local function updatePlayer(prevMap)
   end
 
   if playdate.buttonJustPressed(controls.up) then
+    PlaySFX("G2")
     for i = 1, rows do
       for j = 1, cols do
         if i == #map.player then
@@ -249,6 +256,7 @@ local function updatePlayer(prevMap)
   end
 
   if playdate.buttonJustPressed(controls.down) then
+    PlaySFX("D2")
     for i = 1, rows do
       for j = 1, cols do
         if i == 1 then
@@ -291,14 +299,14 @@ local function lostRound()
   printTable(map)
   print("Lost the round ", mode) -- need to add the last chance swapped controls
   if mode == "default" then
-    PlaySFX("B5")
+    PlaySFX("C6")
     swapMode("swapped")
     newRound()
   elseif mode == "swapped" then
+    PlaySFX("F3")
     if score > SaveData.high_score then
       SaveData.high_score = score
-      end
-    PlaySFX("B5")
+    end
     SwitchScene(SCENE.GAME_OVER)
   end
 end
@@ -322,7 +330,7 @@ local function checkState()
 
   if won then
     print("Won the round") -- no zeroes or twos means all ones
-    PlaySFX("A3")
+    PlaySFX("C5")
     swapMode("default")
     newRound()
   end
