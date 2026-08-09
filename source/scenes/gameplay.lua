@@ -4,7 +4,7 @@ import "CoreLibs/crank"
 local gfx <const> = playdate.graphics
 
 local rows <const> = 8
-local gridSize <const> = (DISPLAY_HEIGHT-30) / rows
+local gridSize <const> = math.floor((DISPLAY_HEIGHT-30) / rows)
 local cols <const> = math.ceil(DISPLAY_WIDTH / gridSize)
 
 local ticksPerRevolution <const> = 6 -- crank speedometer
@@ -16,10 +16,11 @@ local map_init = {
   puzzle = {}, -- current puzzle shape, with offset applied
   puzzleTarget = {}, -- current puzzle shape, without offset
   puzzleLevel = 0, -- how hard the puzzle is this round, could drive the speed or might not use it for now
-  puzzleLevelMax = 5, -- the hardest the puzzle should be this round
   puzzleOffset = cols, -- starts offscreen
-  slowness = 30, -- every how many frames gets offset, starts at 1 update per second at 30fps
 }
+
+slowness = nil -- every how many frames gets offset, starts at 1 update per second at 30fps
+puzzleLevelMax = nil -- the hardest the puzzle should be this round
 
 local mode = nil
 local controls = {}
@@ -62,7 +63,7 @@ local function generatePuzzle()
       end
 
       if token == 0 then
-        if level >= map.puzzleLevelMax then
+        if level >= puzzleLevelMax then
           token = 1 -- black if we reached the maximum level
         else
           level += 1
@@ -90,7 +91,13 @@ local function swapMode(mode_to)
 end
 
 local function newRound()
-  score += 1
+  if mode =="default" then
+    score += 1
+    slowness -= 2
+    if slowness < 10 then slowness = 10 end
+    puzzleLevelMax += 1
+    if puzzleLevelMax > 10 then puzzleLevelMax = 10 end
+  end
 
   map = table.deepcopy(map_init)
   for i = 1, rows do
@@ -115,6 +122,9 @@ function init()
 
   score = -1
   time = 0
+  slowness = 30
+  puzzleLevelMax = 0
+
   updates = 0
   swapMode("default")
   playdate.graphics.setDrawOffset(-gridSize, -gridSize)
@@ -274,7 +284,7 @@ local function offsetPuzzle()
 end
 
 local function updatePuzzle()
-  if updates % map.slowness == 0 then
+  if updates % slowness == 0 then
     offsetPuzzle()
   end
 end
@@ -307,8 +317,13 @@ local function checkState()
     end
   end
 
+  if not won and map.puzzleOffset == -1 then
+    lostRound()
+  end
+
   if won then
     print("Won the round") -- no zeroes or twos means all ones
+    PlaySFX("A3")
     swapMode("default")
     newRound()
   end
