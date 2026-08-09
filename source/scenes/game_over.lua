@@ -2,7 +2,7 @@ local gfx <const> = playdate.graphics
 local md <const> = playdate.metadata
 local MARGIN <const> = 10
 
-local function secondsToClock(seconds)
+function secondsToClock(seconds)
   local seconds = tonumber(seconds)
 
   if seconds <= 0 then

@@ -4,7 +4,7 @@ import "CoreLibs/crank"
 local gfx <const> = playdate.graphics
 
 local rows <const> = 8
-local gridSize <const> = DISPLAY_HEIGHT / rows
+local gridSize <const> = (DISPLAY_HEIGHT-30) / rows
 local cols <const> = math.ceil(DISPLAY_WIDTH / gridSize)
 
 local ticksPerRevolution <const> = 6 -- crank speedometer
@@ -21,6 +21,7 @@ local map_init = {
   slowness = 30, -- every how many frames gets offset, starts at 1 update per second at 30fps
 }
 
+local mode = nil
 local controls = {}
 local controls_default = {
   up = playdate.kButtonUp,
@@ -71,20 +72,26 @@ local function generatePuzzle()
     end
   end
 
-  map.level = level
+  map.puzzleLevel = level
   map.puzzleTarget = table.deepcopy(puzzle)
 end
 
-function init()
-  print("Init Gameplay")
+local function swapMode(mode_to)
+  if mode_to == "default" then
+    controls = controls_default
+    playdate.display.setInverted(false)
+  elseif mode_to == "swapped" then
+    controls = controls_swapped
+    playdate.display.setInverted(true)
+  end
 
-  score = 0
-  time = 0
-  updates = 0
-  controls = controls_default
-  playdate.graphics.setDrawOffset(-gridSize, -gridSize)
+  mode = mode_to
+  print("Setting mode to: ", mode)
+end
 
-  -- init the map for player and puzzle
+local function newRound()
+  score += 1
+
   map = table.deepcopy(map_init)
   for i = 1, rows do
     map.player[i] = {}
@@ -96,9 +103,23 @@ function init()
   end
   map.player[1][1] = 1
 
-  -- printTable(map.player)
-  map.puzzleLevelMax = 5
-  generatePuzzle()
+  while map.puzzleLevel == 0 do
+    generatePuzzle()
+  end
+
+  print("New round! ", score)
+end
+
+function init()
+  print("Init Gameplay")
+
+  score = -1
+  time = 0
+  updates = 0
+  swapMode("default")
+  playdate.graphics.setDrawOffset(-gridSize, -gridSize)
+
+  newRound()
 end
 
 function close()
@@ -107,8 +128,18 @@ end
 
 function drawGame()
   updates += 1
-
   gfx.clear()
+
+
+  playdate.graphics.drawText("" .. score, 35, 245)
+  playdate.graphics.drawText(secondsToClock(time), 70, 245)
+
+  if mode =="swapped" then
+      playdate.graphics.drawText("Last chance! Controls swapped..", 175, 245)
+  else
+      playdate.graphics.drawText("Learn to control..", 290, 245)
+  end
+
   for i = 1, rows do
     for j = 1, cols do
       -- draw our player
@@ -248,18 +279,28 @@ local function updatePuzzle()
   end
 end
 
+local function lostRound()
+  print("Lost the round ", mode) -- need to add the last chance swapped controls
+  if mode == "default" then
+    PlaySFX("B5")
+    swapMode("swapped")
+    newRound()
+  elseif mode == "swapped" then
+    if score > SaveData.high_score then
+      SaveData.high_score = score
+      end
+    PlaySFX("B5")
+    SwitchScene(SCENE.GAME_OVER)
+  end
+end
+
 local function checkState()
   local won = true
   for i = 1, rows do
     for j = 1, cols do
       local cell = map.player[i][j] + map.puzzle[i][j]
       if cell == 2 then
-        print("Lost the round") -- need to add the last chance swapped controls
-        if score > SaveData.high_score then
-          SaveData.high_score = score
-        end
-        PlaySFX("B5")
-        SwitchScene(SCENE.GAME_OVER)
+        lostRound()
       elseif cell == 0 then
         won = false
       end
@@ -268,7 +309,8 @@ local function checkState()
 
   if won then
     print("Won the round") -- no zeroes or twos means all ones
-    score += 1
+    swapMode("default")
+    newRound()
   end
 
 end
