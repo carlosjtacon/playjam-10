@@ -5,7 +5,6 @@ local gfx <const> = playdate.graphics
 
 local rows, gridSize, cols
 
-local ticksPerRevolution <const> = 6 -- crank speedometer
 score, time = 0, 0
 local timeshift = 0
 local updates = nil
@@ -21,6 +20,7 @@ local map_init = {
 
 local slowness = nil -- every how many frames gets offset, starts at 1 update per second at 30fps
 local puzzleLevelMax = nil -- the hardest the puzzle should be this round
+local friction = nil
 
 local mode = nil
 local controls = {}
@@ -32,7 +32,6 @@ local controls_default = {
   addTop = playdate.kButtonA,
   addBottom = playdate.kButtonB,
   forward = 1,
-  rewind = -1,
 }
 local controls_swapped = {
   up = playdate.kButtonDown,
@@ -42,7 +41,6 @@ local controls_swapped = {
   addTop = playdate.kButtonB,
   addBottom = playdate.kButtonA,
   forward = -1,
-  rewind = 1,
 }
 
 local function generatePuzzle()
@@ -99,24 +97,29 @@ end
 local function updateDifficulty()
     slowness -= 1
     if slowness < 10 then slowness = 10 end
+    friction += 5
+    if friction > 120 then friction = 120 end
     puzzleLevelMax += 1
     if puzzleLevelMax > 10 then puzzleLevelMax = 10 end
 
     if score == 10 then
       updateGrid(7)
       slowness = 25
+      friction = 50
       puzzleLevelMax = 5
     end
 
     if score == 20 then
       updateGrid(8)
       slowness = 25
+      friction = 50
       puzzleLevelMax = 5
     end
 
     if score == 30 then
       updateGrid(9)
       slowness = 25
+      friction = 50
       puzzleLevelMax = 5
     end
 
@@ -158,6 +161,7 @@ function init()
   time = 0
   slowness = 30
   puzzleLevelMax = 0
+  friction = 20
 
   updates = 0
   swapMode("default")
@@ -241,16 +245,16 @@ local function getLastMatch(matrix, value)
 end
 
 local function updatePlayer(prevMap)
-  local crankTicks = playdate.getCrankTicks(ticksPerRevolution)
+  local change, _ = playdate.getCrankChange()
 
-  if crankTicks == controls.forward then
+  if change*controls.forward > 0 then
     PlaySFX("E1")
     if map.puzzleOffset > 0 then
       timeshift += 1
     end
   end
 
-  if crankTicks == controls.rewind then
+  if change*controls.forward < -1*friction then
     PlaySFX("B1")
     if map.puzzleOffset < cols-2 then
       timeshift -= 1
