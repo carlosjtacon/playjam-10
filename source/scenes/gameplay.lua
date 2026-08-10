@@ -7,8 +7,8 @@ local rows <const> = 6
 local gridSize <const> = math.floor((DISPLAY_HEIGHT-30) / rows)
 local cols <const> = math.ceil(DISPLAY_WIDTH / gridSize)
 
-local ticksPerRevolution <const> = 1 -- crank speedometer
-score, time = 0, 0
+local ticksPerRevolution <const> = 6 -- crank speedometer
+score, time, timeshift = 0, 0, 0
 local updates = nil
 
 local map = {}
@@ -217,17 +217,15 @@ local function updatePlayer(prevMap)
 
   if crankTicks == controls.forward then
     PlaySFX("E1")
-    print("forward")
     if map.puzzleOffset > 0 then
-      map.puzzleOffset -= 1
+      timeshift += 1
     end
   end
 
   if crankTicks == controls.rewind then
     PlaySFX("B1")
-    print("rewind")
     if map.puzzleOffset < cols then
-      map.puzzleOffset += 1
+      timeshift -= 1
     end
   end
 
@@ -317,8 +315,20 @@ local function offsetPuzzle()
 end
 
 local function updatePuzzle()
-  if updates % slowness == 0 then
+  delay = slowness
+
+  if timeshift ~= 0 then
+    delay = 8 -- crank speedo
+  end
+
+  if updates % delay == 0 then
+    -- print("Updating puzzle ", map.puzzleOffset)
+    -- print("Current slowness ", slowness - math.abs(timeshift))
+    -- print("Current timeshift ", timeshift)
+    -- if timeshift > 0 then map.puzzleOffset -=1 end
+    if timeshift < 0 then map.puzzleOffset +=2 end
     offsetPuzzle()
+    timeshift = 0
   end
 end
 
