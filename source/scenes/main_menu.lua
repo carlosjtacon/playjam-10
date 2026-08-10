@@ -1,3 +1,5 @@
+import "CoreLibs/ui"
+
 local gfx <const> = playdate.graphics
 local md <const> = playdate.metadata
 
@@ -49,12 +51,16 @@ local function update(_dt)
 
   gfx.clear()
 
+  if playdate.isCrankDocked() then
+    playdate.ui.crankIndicator:draw()
+  end
+
   SetFont(Fonts.asheville24Light)
   gfx.drawText(md.name, MARGIN, MARGIN)
 
   SetFont(Fonts.default)
-  gfx.drawText("by " .. md.author, 10, DISPLAY_HEIGHT - ASHEVILLE14_HEIGHT - MARGIN)
-  gfx.drawText(version, DISPLAY_WIDTH - VERSION_TEXT_WIDTH - MARGIN, DISPLAY_HEIGHT - ASHEVILLE14_HEIGHT - MARGIN)
+  -- gfx.drawText("by " .. md.author, 10, DISPLAY_HEIGHT - ASHEVILLE14_HEIGHT - MARGIN)
+  -- gfx.drawText(version, DISPLAY_WIDTH - VERSION_TEXT_WIDTH - MARGIN, DISPLAY_HEIGHT - ASHEVILLE14_HEIGHT - MARGIN)
 
   local menuStartY = 50
   local menuYSpacing = 32
