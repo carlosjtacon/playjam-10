@@ -11,11 +11,13 @@ local MARGIN = 10
 local OPTION = {
   PLAY = 1,
   ZEN = 2,
-  CREDITS = 3,
+  CONTROLS = 3,
+  CREDITS = 4,
 }
 local options = {
   [OPTION.PLAY] = "Play",
   [OPTION.ZEN] = "Zen Mode",
+  [OPTION.CONTROLS] = "Controls",
   [OPTION.CREDITS] = "Credits",
 }
 local currentOption = 1
@@ -44,6 +46,8 @@ local function update(_dt)
       SwitchScene(SCENE.GAMEPLAY)
     elseif currentOption == OPTION.ZEN then
       SwitchScene(SCENE.ZEN)
+    elseif currentOption == OPTION.CONTROLS then
+      SwitchScene(SCENE.CONTROLS)
     elseif currentOption == OPTION.CREDITS then
       SwitchScene(SCENE.CREDITS)
     end

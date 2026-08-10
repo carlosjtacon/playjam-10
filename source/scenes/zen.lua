@@ -169,8 +169,8 @@ local function drawGame()
   playdate.graphics.setDrawOffset(0, 0)
 
   playdate.graphics.drawText("" .. score, 10, 220)
-  playdate.graphics.drawText(secondsToClock(time), 45, 220)
-  playdate.graphics.drawText("Learn to control..", 265, 220)
+  playdate.graphics.drawText(secondsToClock(time), 75, 220)
+  playdate.graphics.drawText("Remember the controls..", 210, 220)
 
 end
 
