@@ -37,7 +37,7 @@ end
 
 local function close()
   gfx.setBackgroundColor(gfx.kColorWhite)
-  gfx.setImageDrawMode(gfx.kDrawModeFillBlack)
+  gfx.setImageDrawMode(gfx.kDrawModeCopy)
 end
 
 local scene = {

@@ -252,7 +252,7 @@ local function updatePlayer(prevMap)
 
   if crankTicks == controls.rewind then
     PlaySFX("B1")
-    if map.puzzleOffset < cols then
+    if map.puzzleOffset < cols-2 then
       timeshift -= 1
     end
   end

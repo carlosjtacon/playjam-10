@@ -4,6 +4,9 @@ local gfx <const> = playdate.graphics
 Fonts = {
   asheville14Bold = gfx.font.new("/System/Fonts/Asheville-Sans-14-Bold.pft"),
   asheville24Light = gfx.font.new("/System/Fonts/Asheville-Sans-24-Light.pft"),
+  rains3x = gfx.font.new("fonts/Rains/font-rains-3x"),
+  rains2x = gfx.font.new("fonts/Rains/font-rains-2x"),
+  rains1x = gfx.font.new("fonts/Rains/font-rains-1x"),
   -- Uncomment the fonts system fonts below to make them available
   -- roobert10Bold = gfx.font.new("/System/Fonts/Roobert-10-Bold.pft"),
   -- roobert11Bold = gfx.font.new("/System/Fonts/Roobert-11-Bold.pft"),
@@ -13,6 +16,8 @@ Fonts = {
 }
 
 Fonts.default = Fonts.asheville14Bold
+Fonts.title = Fonts.rains3x
+Fonts.subtitle = Fonts.rains2x
 
 -- Sets the font to draw for future `playdate.graphics.drawText` calls; gets
 -- reset to `default` at the start of each frame

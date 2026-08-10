@@ -30,7 +30,7 @@ local function update(_dt)
 
   gfx.clear()
 
-  SetFont(Fonts.asheville24Light)
+  SetFont(Fonts.title)
   gfx.drawText("GAME OVER", MARGIN, MARGIN)
 
   SetFont(Fonts.default)

@@ -1,12 +1,10 @@
 import "CoreLibs/ui"
+import "CoreLibs/graphics"
 
 local gfx <const> = playdate.graphics
 local md <const> = playdate.metadata
 
-local version = md.version
-local VERSION_TEXT_WIDTH = Fonts.asheville14Bold:getTextWidth(version)
-local ASHEVILLE14_HEIGHT = Fonts.asheville14Bold:getHeight()
-local MARGIN = 10
+local MARGIN = 20
 
 local OPTION = {
   PLAY = 1,
@@ -55,27 +53,73 @@ local function update(_dt)
 
   gfx.clear()
 
+  SetFont(Fonts.title)
+
+  gfx.setColor(gfx.kColorBlack)
+  gfx.fillRect(0, 0, DISPLAY_WIDTH, 60)
+  gfx.setColor(gfx.kColorWhite)
+  gfx.drawLine(0, 58, DISPLAY_WIDTH, 58)
+  gfx.setColor(gfx.kColorBlack)
+
+  gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
+  gfx.drawText(md.name, MARGIN, MARGIN)
+  gfx.setImageDrawMode(gfx.kDrawModeCopy)
+
+  SetFont(Fonts.subtitle)
+
+  local menuStartY = 40
+  local menuYSpacing = 40
+  local menuHeight = 31
+  local menuLength = DISPLAY_WIDTH - MARGIN - menuHeight - 5 - MARGIN
+  for index, value in pairs(options) do
+    if currentOption == index then
+      -- text frame
+      gfx.setColor(gfx.kColorBlack)
+      gfx.fillRoundRect(MARGIN, menuStartY-8 + menuYSpacing * index, menuLength, menuHeight, 3)
+      gfx.setColor(gfx.kColorWhite)
+      gfx.fillRoundRect(MARGIN+1, menuStartY-8+1 + menuYSpacing * index, menuLength-2, menuHeight-2, 3)
+      gfx.setColor(gfx.kColorBlack)
+      gfx.fillRoundRect(MARGIN+1+1, menuStartY-8+1+1 + menuYSpacing * index, menuLength-2-2, menuHeight-2-2, 3)
+
+      -- block
+      gfx.setColor(gfx.kColorBlack)
+      gfx.fillRoundRect(MARGIN+menuLength+5, menuStartY-8 + menuYSpacing * index, menuHeight, menuHeight, 3)
+      gfx.setColor(gfx.kColorWhite)
+      gfx.fillRoundRect(MARGIN+menuLength+5+1, menuStartY-8+1 + menuYSpacing * index, menuHeight-2, menuHeight-2, 3)
+      gfx.setColor(gfx.kColorBlack)
+      gfx.fillRoundRect(MARGIN+menuLength+5+1+1, menuStartY-8+1+1 + menuYSpacing * index, menuHeight-2-2, menuHeight-2-2, 3)
+
+      -- text
+      gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
+      gfx.drawText(value, MARGIN + 10, menuStartY + (menuYSpacing * index))
+      gfx.setImageDrawMode(gfx.kDrawModeCopy)
+    else
+      -- background
+      gfx.setColor(gfx.kColorBlack)
+      gfx.fillRoundRect(MARGIN, menuStartY-8 + menuYSpacing * index, menuLength+menuHeight+5, menuHeight, 3)
+
+      -- pattern
+      gfx.setColor(gfx.kColorWhite)
+      for line = 1, menuHeight do
+        if line % 2 == 0 then
+          gfx.fillRect(MARGIN, menuStartY-8 + menuYSpacing * index+line, menuLength+menuHeight+5, 1)
+        end
+      end
+
+      -- frame
+      gfx.setColor(gfx.kColorBlack)
+      gfx.drawRoundRect(MARGIN, menuStartY-8 + menuYSpacing * index, menuLength+menuHeight+5, menuHeight, 3)
+
+      gfx.setImageDrawMode(gfx.kDrawModeFillBlack)
+      gfx.drawText(value, MARGIN + 10, menuStartY + (menuYSpacing * index))
+      gfx.setImageDrawMode(gfx.kDrawModeCopy)
+    end
+  end
+
   if playdate.isCrankDocked() then
     playdate.ui.crankIndicator:draw()
   end
 
-  SetFont(Fonts.asheville24Light)
-  gfx.drawText(md.name, MARGIN, MARGIN)
-
-  SetFont(Fonts.default)
-  -- gfx.drawText("by " .. md.author, 10, DISPLAY_HEIGHT - ASHEVILLE14_HEIGHT - MARGIN)
-  -- gfx.drawText(version, DISPLAY_WIDTH - VERSION_TEXT_WIDTH - MARGIN, DISPLAY_HEIGHT - ASHEVILLE14_HEIGHT - MARGIN)
-
-  local menuStartY = 50
-  local menuYSpacing = 32
-  local menuDotSize = 6
-  for index, value in pairs(options) do
-    gfx.drawText(value, MARGIN + 10, menuStartY + (menuYSpacing * index))
-
-    if currentOption == index then
-      gfx.fillRect(MARGIN, menuStartY + 5 + menuYSpacing * index, menuDotSize, menuDotSize)
-    end
-  end
 end
 
 local function init()
