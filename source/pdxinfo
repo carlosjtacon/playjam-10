@@ -2,6 +2,6 @@ name=Don't Loose Control
 author=Carlos
 description=A kind of tetris
 bundleID=com.carlosjtacon.dontloosecontrol
-version=0.1
+version=0.1-dev
 buildNumber=1
 #itch=username/gameslug

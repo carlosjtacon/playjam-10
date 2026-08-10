@@ -137,35 +137,57 @@ function init()
   newRound()
 end
 
+local margin = 1
 local function drawGame()
   updates += 1
   gfx.clear()
 
-
-  playdate.graphics.drawText("" .. score, 10, 220)
-  playdate.graphics.drawText(secondsToClock(time), 45, 220)
-
-  if mode =="swapped" then
-      playdate.graphics.drawText("Last chance! Controls swapped..", 150, 220)
-  else
-      playdate.graphics.drawText("Learn to control..", 265, 220)
-  end
-
   playdate.graphics.setDrawOffset(-gridSize, -gridSize)
+  -- draw our puzzle background
+  gfx.setColor(gfx.kColorBlack)
+  for i = 1, rows do
+    for j = 1, cols do
+      if map.puzzle[i][j] == 1 then
+        gfx.fillRoundRect(j*gridSize+margin, i*gridSize+margin, gridSize-margin*2, gridSize-margin*2, 3)
+      end
+    end
+  end
+  -- draw our puzzle stripped pattern
+  gfx.setColor(gfx.kColorWhite)
+  for i = 1, rows do
+    for line = 1, gridSize do
+      if line % 2 == 0 then
+        gfx.fillRect(gridSize, i*gridSize+line, DISPLAY_WIDTH, 1)
+      end
+    end
+  end
   for i = 1, rows do
     for j = 1, cols do
       -- draw our player
       if map.player[i][j] == 1 then
-        gfx.fillRect(j * gridSize + 1, i * gridSize + 1, gridSize -2, gridSize -2)
+        gfx.setColor(gfx.kColorBlack)
+        gfx.fillRoundRect(j*gridSize+margin, i*gridSize+margin, gridSize-margin*2, gridSize-margin*2, 3)
+        gfx.setColor(gfx.kColorWhite)
+        gfx.fillRoundRect(j*gridSize+margin+1, i*gridSize+margin+1, gridSize-margin*4, gridSize-margin*4, 3)
+        gfx.setColor(gfx.kColorBlack)
+        gfx.fillRoundRect(j*gridSize+margin+1+1, i*gridSize+margin+1+1, gridSize-margin*6, gridSize-margin*6, 3)
       end
-      -- draw our puzzle
+      -- draw our puzzle outline
       if map.puzzle[i][j] == 1 then
-        gfx.fillRect(j * gridSize + 1, i * gridSize + 1, gridSize -2, gridSize -2)
+        gfx.setColor(gfx.kColorBlack)
+        gfx.drawRoundRect(j*gridSize+margin, i*gridSize+margin, gridSize-margin*2, gridSize-margin*2, 3)
       end
     end
   end
   playdate.graphics.setDrawOffset(0, 0)
 
+  playdate.graphics.drawText("" .. score, 10, 220)
+  playdate.graphics.drawText(secondsToClock(time), 45, 220)
+  if mode =="swapped" then
+      playdate.graphics.drawText("Last chance! Controls swapped..", 150, 220)
+  else
+      playdate.graphics.drawText("Learn to control..", 265, 220)
+  end
 end
 
 local function getFirstMatch(matrix, value)
