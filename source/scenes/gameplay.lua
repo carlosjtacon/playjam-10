@@ -3,12 +3,11 @@ import "CoreLibs/crank"
 
 local gfx <const> = playdate.graphics
 
-local rows <const> = 6
-local gridSize <const> = math.floor((DISPLAY_HEIGHT-30) / rows)
-local cols <const> = math.ceil(DISPLAY_WIDTH / gridSize)
+local rows, gridSize, cols
 
 local ticksPerRevolution <const> = 6 -- crank speedometer
-score, time, timeshift = 0, 0, 0
+score, time = 0, 0
+local timeshift = 0
 local updates = nil
 
 local map = {}
@@ -17,7 +16,7 @@ local map_init = {
   puzzle = {}, -- current puzzle shape, with offset applied
   puzzleTarget = {}, -- current puzzle shape, without offset
   puzzleLevel = 0, -- how hard the puzzle is this round, could drive the speed or might not use it for now
-  puzzleOffset = cols, -- starts offscreen
+  puzzleOffset = 0, -- starts offscreen
 }
 
 local slowness = nil -- every how many frames gets offset, starts at 1 update per second at 30fps
@@ -91,11 +90,36 @@ local function swapMode(mode_to)
   print("Setting mode to: ", mode)
 end
 
+local function updateGrid(num_rows)
+  rows = num_rows
+  gridSize = math.floor((DISPLAY_HEIGHT-30) / rows)
+  cols = math.ceil(DISPLAY_WIDTH / gridSize)
+end
+
 local function updateDifficulty()
     slowness -= 1
-    if slowness < 14 then slowness = 14 end
+    if slowness < 10 then slowness = 10 end
     puzzleLevelMax += 1
     if puzzleLevelMax > 10 then puzzleLevelMax = 10 end
+
+    if score == 10 then
+      updateGrid(7)
+      slowness = 25
+      puzzleLevelMax = 5
+    end
+
+    if score == 20 then
+      updateGrid(8)
+      slowness = 25
+      puzzleLevelMax = 5
+    end
+
+    if score == 30 then
+      updateGrid(9)
+      slowness = 25
+      puzzleLevelMax = 5
+    end
+
 end
 
 local function newRound()
@@ -120,11 +144,15 @@ local function newRound()
     generatePuzzle()
   end
 
+  map.puzzleOffset = cols
+
   print("New round! ", score)
 end
 
 function init()
   print("Init Gameplay")
+
+  updateGrid(6)
 
   score = -1
   time = 0
