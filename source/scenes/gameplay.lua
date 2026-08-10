@@ -97,29 +97,29 @@ end
 local function updateDifficulty()
     slowness -= 1
     if slowness < 10 then slowness = 10 end
-    friction += 5
-    if friction > 120 then friction = 120 end
+    friction += 1
+    if friction > 50 then friction = 50 end
     puzzleLevelMax += 1
     if puzzleLevelMax > 10 then puzzleLevelMax = 10 end
 
     if score == 10 then
       updateGrid(7)
       slowness = 25
-      friction = 50
+      friction = 35
       puzzleLevelMax = 5
     end
 
     if score == 20 then
       updateGrid(8)
       slowness = 25
-      friction = 50
+      friction = 35
       puzzleLevelMax = 5
     end
 
     if score == 30 then
       updateGrid(9)
       slowness = 25
-      friction = 50
+      friction = 35
       puzzleLevelMax = 5
     end
 
@@ -161,7 +161,7 @@ function init()
   time = 0
   slowness = 30
   puzzleLevelMax = 0
-  friction = 20
+  friction = 25
 
   updates = 0
   swapMode("default")
