@@ -2,6 +2,7 @@ name=SQUARE SPACE
 author=Carlos
 description=A kind of tetris
 bundleID=com.carlosjtacon.dontloosecontrol
+imagePath=launcher
 version=0.1
 buildNumber=1
 #itch=username/gameslug
