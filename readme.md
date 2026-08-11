@@ -5,5 +5,3 @@
 <p>This is my first game ever!<br>Made for the <a href="https://itch.io/jam/playjam-10">PlayJam 10</a> Game Jam.<br><br></p>
 <h4>How to Install</h4>
 <p>Download the pdx file and&nbsp;<a href="https://help.play.date/games/sideloading/" target="_blank">sideload</a>&nbsp;in your playdate!<br><br>If you don't have a Playdate you can get one, it's quite fun! If you just want to try the game you can&nbsp;<a href="https://play.date/dev/" target="_blank">install the simulator</a>&nbsp;in pc and load the game. It should work with a controller as well, but using the crank might not be the best.<br></p>
-
-<iframe frameborder="0" src="https://itch.io/embed/4882868?linkback=true&amp;border_width=5&amp;bg_color=FFCD3F&amp;fg_color=2d2d2d&amp;link_color=8741de&amp;border_color=2d2d2d" width="560" height="175"><a href="https://ctacon.itch.io/square-space">Square Space by ctacon</a></iframe>
